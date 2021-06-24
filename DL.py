@@ -52,15 +52,15 @@ def LSTM_model():
 
     model = Sequential()
 
-    model.add(LSTM(units=50, return_sequences=True,
+    model.add(LSTM(units=100, return_sequences=True,
                    input_shape=(x_train.shape[1], 1)))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.25))
 
-    model.add(LSTM(units=50, return_sequences=True))
-    model.add(Dropout(0.2))
+    model.add(LSTM(units=100, return_sequences=True))
+    model.add(Dropout(0.25))
 
-    model.add(LSTM(units=50))
-    model.add(Dropout(0.2))
+    model.add(LSTM(units=100))
+    model.add(Dropout(0.25))
 
     model.add(Dense(units=1))
 
@@ -163,7 +163,30 @@ model3.fit(x_train,
           epochs=30,
           batch_size=10,
           callbacks=[checkpointer])  
+
+
+#%% Models declaration 
+model1 = LSTM_model()
+
+model1.summary()
+model1.compile(optimizer='adam',
+              loss='mean_squared_error')
+
+
+model2 = GRU_model()
+
+model2.summary()
+model2.compile(optimizer='adam',
+              loss='mean_squared_error')
+
+model3 = GRU_LSTM_model()
+
+model3.summary()
+model3.compile(optimizer='adam',
+              loss='mean_squared_error')
+
 #%%
+
 # test model accuracy on existing data
 test_data = load_data(company = 'FB',
                       start = dt.datetime(2020,1,1),
@@ -176,6 +199,13 @@ total_dataset = pd.concat((data['Close'], test_data['Close']), axis=0)
 model_inputs = total_dataset[len(total_dataset) - len(test_data) - prediction_days:].values
 model_inputs = model_inputs.reshape(-1,1)
 model_inputs = scaler.transform(model_inputs)
+
+
+
+#Load best weights for each model 
+model1.load_weights('./weights_best.hdf5')
+model2.load_weights('./weights_best_gru.hdf5')
+model3.load_weights('./weights_best_mix.hdf5')
 
 #Construction du jeu de test
 x_test = []
